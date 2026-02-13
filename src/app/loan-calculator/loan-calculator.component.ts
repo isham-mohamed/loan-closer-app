@@ -1,52 +1,67 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { LoanService } from '../services/loan.service';
-import { AmortizationRow, LoanInput } from '../models/loan-data.model';
+import { ThemeService } from '../services/theme.service';
+import {
+  AmortizationRow,
+  ExtraPaymentComparison,
+  ExtraPaymentStrategy,
+  LoanCalculationResult,
+  LoanInput,
+} from '../models/loan-data.model';
+import { CalculatorHeaderComponent } from './calculator-header/calculator-header.component';
+import { LoanFormComponent } from './loan-form/loan-form.component';
+import { LoanSummaryComponent } from './loan-summary/loan-summary.component';
+import { AmortizationTableComponent } from './amortization-table/amortization-table.component';
+import { ExtraPaymentStrategyDialogComponent } from './extra-payment-strategy-dialog/extra-payment-strategy-dialog.component';
+import { ExtraPaymentComparisonComponent } from './extra-payment-comparison/extra-payment-comparison.component';
+
+const LOCALE = 'en-IN';
 
 @Component({
   selector: 'app-loan-calculator',
-  imports: [CommonModule, FormsModule],
+  standalone: true,
+  imports: [
+    CommonModule,
+    CalculatorHeaderComponent,
+    LoanFormComponent,
+    LoanSummaryComponent,
+    AmortizationTableComponent,
+    ExtraPaymentStrategyDialogComponent,
+    ExtraPaymentComparisonComponent,
+  ],
   templateUrl: './loan-calculator.component.html',
   styleUrls: ['./loan-calculator.component.scss'],
 })
 export class LoanCalculatorComponent implements OnInit {
-  // Form inputs
   principal: number | null = null;
-  principalDisplay: string = '';
+  principalDisplay = '';
   annualRate: number | null = null;
   tenureYears: number | null = null;
   tenureMonths: number | null = null;
-  startDate: string = this.getTodayDate();
+  startDate = this.getTodayDate();
+  extraPayment: number | null = null;
+  extraPaymentDisplay = '';
 
-  // Results
   emi = 0;
   totalPayable = 0;
   totalInterest = 0;
   schedule: AmortizationRow[] = [];
 
-  // Theme
-  isDarkMode = false;
-
-  private readonly STORAGE_THEME_KEY = 'themeMode';
-  private readonly THEME_DARK = 'dark';
-  private readonly THEME_LIGHT = 'light';
-  private readonly LOCALE = 'en-IN';
+  showStrategyDialog = false;
+  comparison: ExtraPaymentComparison | null = null;
+  selectedStrategy: ExtraPaymentStrategy = null;
 
   constructor(
     private loanService: LoanService,
-    private el: ElementRef,
+    private theme: ThemeService,
+    private el: ElementRef<HTMLElement>,
   ) {}
 
   ngOnInit(): void {
-    this.loadTheme();
+    this.theme.loadTheme();
+    this.theme.applyThemeToElement(this.el.nativeElement);
     this.loadData();
-  }
-
-  toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
-    this.setThemeStorage(this.isDarkMode);
-    this.applyTheme();
   }
 
   calculate(): void {
@@ -58,6 +73,12 @@ export class LoanCalculatorComponent implements OnInit {
     this.totalPayable = result.totalPayable;
     this.schedule = result.schedule;
 
+    if (this.extraPayment && this.extraPayment > 0) {
+      this.showStrategyDialog = true;
+    } else {
+      this.comparison = null;
+    }
+
     this.saveData();
   }
 
@@ -68,7 +89,12 @@ export class LoanCalculatorComponent implements OnInit {
     this.tenureYears = null;
     this.tenureMonths = null;
     this.startDate = this.getTodayDate();
+    this.extraPayment = null;
+    this.extraPaymentDisplay = '';
     this.resetResults();
+    this.showStrategyDialog = false;
+    this.comparison = null;
+    this.selectedStrategy = null;
     this.loanService.clearData();
   }
 
@@ -79,55 +105,104 @@ export class LoanCalculatorComponent implements OnInit {
       this.principalDisplay = '';
       return;
     }
-
     const num = parseInt(input, 10);
     if (!isNaN(num)) {
       this.principal = num;
-      this.principalDisplay = num.toLocaleString(this.LOCALE);
+      this.principalDisplay = num.toLocaleString(LOCALE);
     }
   }
 
-  formatMoney(value: number): string {
-    return value.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  }
-
-  private loadTheme(): void {
-    const savedTheme = localStorage.getItem(this.STORAGE_THEME_KEY);
-    if (savedTheme) {
-      this.isDarkMode = savedTheme === this.THEME_DARK;
-    } else {
-      this.isDarkMode = this.getSystemThemePreference();
+  onExtraPaymentChange(event: Event): void {
+    const input = (event.target as HTMLInputElement).value.replace(/,/g, '');
+    if (!input) {
+      this.extraPayment = null;
+      this.extraPaymentDisplay = '';
+      return;
     }
-    this.applyTheme();
+    const num = parseInt(input, 10);
+    if (!isNaN(num) && num > 0) {
+      this.extraPayment = num;
+      this.extraPaymentDisplay = num.toLocaleString(LOCALE);
+    }
   }
 
-  private applyTheme(): void {
-    const theme = this.isDarkMode ? this.THEME_DARK : this.THEME_LIGHT;
-    this.el.nativeElement.setAttribute('data-theme', theme);
-    document.documentElement.setAttribute('data-theme', theme);
+  onStrategySelected(strategy: ExtraPaymentStrategy): void {
+    this.selectedStrategy = strategy;
+    this.calculateComparison();
+    this.showStrategyDialog = false;
   }
 
-  private setThemeStorage(isDark: boolean): void {
-    localStorage.setItem(this.STORAGE_THEME_KEY, isDark ? this.THEME_DARK : this.THEME_LIGHT);
+  closeStrategyDialog(): void {
+    this.showStrategyDialog = false;
   }
 
-  private getSystemThemePreference(): boolean {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  clearComparison(): void {
+    this.comparison = null;
+    this.selectedStrategy = null;
+    this.extraPayment = null;
+    this.extraPaymentDisplay = '';
+  }
+
+  private calculateComparison(): void {
+    const input = this.buildLoanInput();
+    const original = this.loanService.calculateLoan(input);
+
+    const inputReduceEmi = {
+      ...input,
+      principal: (input.principal || 0) - (this.extraPayment || 0),
+    };
+    const withExtraPaymentReduceEmi = this.loanService.calculateLoan(inputReduceEmi);
+    const withExtraPaymentReduceTenure = this.calculateWithReducedTenure(input);
+
+    this.comparison = {
+      original,
+      withExtraPaymentReduceEmi,
+      withExtraPaymentReduceTenure,
+    };
+  }
+
+  private calculateWithReducedTenure(input: LoanInput): LoanCalculationResult {
+    if (!this.extraPayment || this.extraPayment <= 0) {
+      return this.loanService.calculateLoan(input);
+    }
+
+    const tempMonths = this.getTotalMonths(input);
+
+    for (let m = tempMonths; m >= 1; m--) {
+      const tempInput = { ...input, tenureMonths: m };
+      const tempResult = this.loanService.calculateLoan(tempInput);
+
+      if (
+        tempResult.totalPayable + this.extraPayment >=
+        this.loanService.calculateLoan(input).totalPayable
+      ) {
+        return tempResult;
+      }
+    }
+
+    return this.loanService.calculateLoan(input);
+  }
+
+  private getTotalMonths(input: LoanInput): number {
+    if (input.tenureMonths && input.tenureMonths > 0) return input.tenureMonths;
+    if (input.tenureYears && input.tenureYears > 0) return input.tenureYears * 12;
+    return 0;
   }
 
   private loadData(): void {
     const data = this.loanService.loadData();
     if (!data) return;
 
-    this.principal = data.principal || null;
-    this.principalDisplay = data.principal ? data.principal.toLocaleString(this.LOCALE) : '';
-    this.annualRate = data.annualRate || null;
-    this.tenureYears = data.tenureYears || null;
-    this.tenureMonths = data.tenureMonths || null;
-    this.startDate = data.startDate || this.getTodayDate();
+    this.principal = data.principal ?? null;
+    this.principalDisplay = data.principal ? data.principal.toLocaleString(LOCALE) : '';
+    this.annualRate = data.annualRate ?? null;
+    this.tenureYears = data.tenureYears ?? null;
+    this.tenureMonths = data.tenureMonths ?? null;
+    this.startDate = data.startDate ?? this.getTodayDate();
+    this.extraPayment = data.extraPayment ?? null;
+    this.extraPaymentDisplay = data.extraPayment
+      ? data.extraPayment.toLocaleString(LOCALE)
+      : '';
 
     if (data.result) {
       this.emi = data.result.emi;
@@ -135,11 +210,15 @@ export class LoanCalculatorComponent implements OnInit {
       this.totalPayable = data.result.totalPayable;
       this.schedule = data.result.schedule;
     }
+
+    if (data.comparison) {
+      this.comparison = data.comparison;
+    }
   }
 
   private saveData(): void {
     const input = this.buildLoanInput();
-    const data = {
+    this.loanService.saveData({
       ...input,
       result: {
         emi: this.emi,
@@ -147,8 +226,8 @@ export class LoanCalculatorComponent implements OnInit {
         totalPayable: this.totalPayable,
         schedule: this.schedule,
       },
-    };
-    this.loanService.saveData(data);
+      ...(this.comparison && { comparison: this.comparison }),
+    });
   }
 
   private resetResults(): void {
@@ -165,11 +244,11 @@ export class LoanCalculatorComponent implements OnInit {
       tenureYears: this.tenureYears,
       tenureMonths: this.tenureMonths,
       startDate: this.startDate,
+      extraPayment: this.extraPayment,
     };
   }
 
   private getTodayDate(): string {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+    return new Date().toISOString().split('T')[0];
   }
 }

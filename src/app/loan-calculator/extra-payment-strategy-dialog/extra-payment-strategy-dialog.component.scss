@@ -1,0 +1,79 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px var(--shadow);
+  animation: slideIn 0.3s ease;
+
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 20px;
+    color: var(--text-primary);
+  }
+
+  p {
+    margin: 0 0 28px 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.strategy-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.strategy-btn {
+  background: var(--input-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #667eea;
+    background: var(--bg-tertiary);
+    transform: translateX(4px);
+  }
+
+  .strategy-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .strategy-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+}

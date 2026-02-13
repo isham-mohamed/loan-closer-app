@@ -1,8 +1,4 @@
-// ============================================================================
-// THEME VARIABLES
-// ============================================================================
-
-// Light Mode (Default)
+// Theme variables (shared via :host and :root for child components)
 $light-theme: (
   bg-primary: #f5f7fa,
   bg-secondary: #ffffff,
@@ -16,7 +12,6 @@ $light-theme: (
   header-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%),
 );
 
-// Dark Mode
 $dark-theme: (
   bg-primary: #1a202c,
   bg-secondary: #2d3748,
@@ -30,50 +25,34 @@ $dark-theme: (
   header-gradient: linear-gradient(135deg, #1a202c 0%, #2d3748 100%),
 );
 
-// ============================================================================
-// UTILITY MIXINS
-// ============================================================================
+@use 'sass:map';
 
 @mixin apply-theme($theme) {
-  --bg-primary: #{map-get($theme, bg-primary)};
-  --bg-secondary: #{map-get($theme, bg-secondary)};
-  --bg-tertiary: #{map-get($theme, bg-tertiary)};
-  --text-primary: #{map-get($theme, text-primary)};
-  --text-secondary: #{map-get($theme, text-secondary)};
-  --border-color: #{map-get($theme, border-color)};
-  --input-bg: #{map-get($theme, input-bg)};
-  --card-bg: #{map-get($theme, card-bg)};
-  --shadow: #{map-get($theme, shadow)};
-  --header-gradient: #{map-get($theme, header-gradient)};
+  --bg-primary: #{map.get($theme, bg-primary)};
+  --bg-secondary: #{map.get($theme, bg-secondary)};
+  --bg-tertiary: #{map.get($theme, bg-tertiary)};
+  --text-primary: #{map.get($theme, text-primary)};
+  --text-secondary: #{map.get($theme, text-secondary)};
+  --border-color: #{map.get($theme, border-color)};
+  --input-bg: #{map.get($theme, input-bg)};
+  --card-bg: #{map.get($theme, card-bg)};
+  --shadow: #{map.get($theme, shadow)};
+  --header-gradient: #{map.get($theme, header-gradient)};
 }
-
-@mixin flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-@mixin card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px var(--shadow);
-  border: 1px solid var(--border-color);
-}
-
-@mixin transition($properties: all) {
-  transition: $properties 0.2s ease;
-}
-
-// ============================================================================
-// BASE STYLES
-// ============================================================================
 
 :host {
   display: block;
   height: 100vh;
   overflow: hidden;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
   @include apply-theme($light-theme);
@@ -104,67 +83,11 @@ $dark-theme: (
   background: var(--bg-primary);
 }
 
-// ============================================================================
-// HEADER
-// ============================================================================
-
-.header {
-  background: var(--header-gradient);
-  color: white;
-  padding: 24px;
-  box-shadow: 0 4px 12px var(--shadow);
-}
-
-.header-content {
-  display: flex;
-  flex-direction: column;
-
-  h1 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-
-  p {
-    margin: 0;
-    font-size: 14px;
-    opacity: 0.9;
-  }
-}
-
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.theme-toggle {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 20px;
-  cursor: pointer;
-  color: white;
-  @include transition;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: scale(1.05);
-  }
-}
-
-// ============================================================================
-// LAYOUT
-// ============================================================================
-
 .main-content {
   display: flex;
   gap: 24px;
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0; /* Allow shrink so table panel scroll works */
   overflow: hidden;
   padding: 24px;
   max-width: 1400px;
@@ -172,298 +95,12 @@ $dark-theme: (
   width: 100%;
 }
 
-// ============================================================================
-// FORM STYLING
-// ============================================================================
-
 .form-panel {
   flex: 0 0 350px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
-.form-section {
-  @include card;
-  padding: 24px;
-
-  h2 {
-    margin: 0 0 20px 0;
-    font-size: 18px;
-    color: var(--text-primary);
-  }
-}
-
-.form-group {
-  margin-bottom: 16px;
-
-  label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    letter-spacing: 0.3px;
-  }
-
-  &:last-of-type {
-    margin-bottom: 20px;
-  }
-}
-
-.input-wrapper {
-  display: flex;
-  align-items: center;
-  background: var(--input-bg);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  @include transition;
-  overflow: hidden;
-
-  &:focus-within {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
-
-  input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    padding: 10px 12px;
-    font-size: 14px;
-    color: var(--text-primary);
-    outline: none;
-
-    &::placeholder {
-      color: var(--text-secondary);
-    }
-  }
-}
-
-.currency,
-.unit {
-  padding: 0 12px;
-  color: var(--text-secondary);
-  font-weight: 600;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-.tenure-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
-
-  .form-group {
-    margin-bottom: 0;
-
-    &:last-of-type {
-      margin-bottom: 0;
-    }
-  }
-}
-
-.form-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-// ============================================================================
-// BUTTONS
-// ============================================================================
-
-.btn {
-  padding: 11px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  @include transition;
-  letter-spacing: 0.3px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-
-  &:hover,
-  &:active {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
-.btn-secondary {
-  background: var(--input-bg);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-
-  &:hover {
-    background: var(--border-color);
-  }
-}
-
-// ============================================================================
-// RESULTS
-// ============================================================================
-
-.results-card {
-  @include card;
-  padding: 20px;
-
-  h3 {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    color: var(--text-primary);
-  }
-}
-
-.result-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-color);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  .label {
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-
-  .value {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-primary);
-
-    &.highlight {
-      color: #ed8936;
-    }
-  }
-}
-
-// ============================================================================
-// TABLE STYLING
-// ============================================================================
-
-.table-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-
-  h2 {
-    margin: 0;
-    font-size: 18px;
-    color: var(--text-primary);
-  }
-}
-
-.row-count {
-  background: #667eea;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.table-container {
-  flex: 1;
-  @include card;
-  overflow: auto;
-}
-
-.amortization-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 15px;
-  color: var(--text-primary);
-
-  thead {
-    position: sticky;
-    top: 0;
-    background: var(--input-bg);
-    z-index: 10;
-  }
-
-  th {
-    padding: 14px 12px;
-    text-align: right;
-    font-weight: 700;
-    color: var(--text-secondary);
-    border-bottom: 2px solid var(--border-color);
-    letter-spacing: 0.3px;
-    font-size: 14px;
-
-    &:first-child {
-      text-align: center;
-    }
-  }
-
-  td {
-    padding: 12px;
-    text-align: right;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
-    font-weight: 500;
-
-    &.month-col {
-      text-align: center;
-      font-weight: 600;
-      color: #667eea;
-    }
-
-    &.number {
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-    }
-
-    &.interest {
-      color: #d69e2e;
-      font-weight: 500;
-    }
-
-    &.principal {
-      color: #38a169;
-      font-weight: 500;
-    }
-  }
-
-  tbody tr {
-    &.alternate {
-      background: var(--bg-tertiary);
-    }
-
-    &:hover {
-      background: var(--input-bg);
-    }
-  }
-}
-
-// ============================================================================
-// RESPONSIVE DESIGN
-// ============================================================================
 
 @media (max-width: 1024px) {
   .main-content {
@@ -475,47 +112,10 @@ $dark-theme: (
   .form-panel {
     flex: 0 0 auto;
   }
-
-  .table-panel {
-    flex: 1;
-    min-height: 400px;
-  }
 }
 
 @media (max-width: 640px) {
-  .header {
-    padding: 16px;
-
-    .header-content h1 {
-      font-size: 22px;
-    }
-  }
-
   .main-content {
     padding: 12px;
-  }
-
-  .form-section,
-  .results-card {
-    padding: 10px 8px;
-  }
-
-  .tenure-group,
-  .form-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .table-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .amortization-table {
-    th,
-    td {
-      padding: 10px 8px;
-      font-size: 12px;
-    }
   }
 }

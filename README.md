@@ -7,6 +7,9 @@ A modern, responsive Angular application for calculating loan EMI (Equated Month
 - ✨ **EMI Calculation** - Calculate monthly EMI with precision
 - 📊 **Amortization Schedule** - View detailed month-by-month payment breakdown with actual due dates
 - 📅 **Loan Start Date** - Specify when your loan begins to see actual monthly payment due dates
+- 💵 **Extra Payment Analysis** - Compare scenarios of paying extra amount one-time with two strategies:
+  - Reduce Monthly EMI (keep same tenure, lower payments)
+  - Reduce Tenure (keep same EMI, finish loan early)
 - 🎨 **Dark/Light Theme** - Toggle between dark and light modes with persistent preference
 - 💾 **Auto-Save** - Automatically saves calculation data to localStorage
 - 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
@@ -57,7 +60,22 @@ The app will automatically reload when you make changes to the code.
 4. **Enter Tenure** - Choose either:
    - Years (will be converted to months)
    - Months (direct entry)
-5. **Click Calculate** - View instant results
+5. **(Optional) Enter Extra Payment** - Specify a one-time extra payment towards principal
+6. **Click Calculate** - View instant results
+
+### Extra Payment Comparison
+
+If you enter an extra payment amount, after clicking Calculate:
+
+1. A dialog will appear asking how you'd like to use the extra payment:
+   - **Reduce Monthly EMI** - Your extra payment reduces the principal, lowering your monthly EMI while keeping the same tenure
+   - **Reduce Tenure** - Your extra payment reduces the principal, allowing you to pay off the loan in fewer months
+
+2. Select your preferred strategy to see a side-by-side comparison showing:
+   - **Original Loan** - Your original loan terms
+   - **With Extra Payment (Reduce EMI)** - Lower monthly payments with same tenure
+   - **With Extra Payment (Reduce Tenure)** - Same monthly EMI but finish early
+   - **Savings** - Interest saved and months saved with each strategy
 
 ### Understanding Results
 

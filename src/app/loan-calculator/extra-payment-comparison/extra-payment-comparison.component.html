@@ -1,0 +1,82 @@
+@if (comparison) {
+  <div class="comparison-panel">
+    <div class="comparison-header">
+      <h2>Extra Payment Comparison</h2>
+      <button class="btn btn-secondary btn-sm" (click)="onClose()">Close Comparison</button>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="comparison-card">
+        <h4>Original Loan</h4>
+        <div class="comparison-item">
+          <span class="label">Monthly EMI</span>
+          <span class="value">₹ {{ comparison.original.emi | formatCurrency }}</span>
+        </div>
+        <div class="comparison-item">
+          <span class="label">Tenure (Months)</span>
+          <span class="value">{{ comparison.original.schedule.length }}</span>
+        </div>
+        <div class="comparison-item">
+          <span class="label">Total Interest</span>
+          <span class="value highlight">₹ {{ comparison.original.totalInterest | formatCurrency }}</span>
+        </div>
+        <div class="comparison-item">
+          <span class="label">Total Payable</span>
+          <span class="value">₹ {{ comparison.original.totalPayable | formatCurrency }}</span>
+        </div>
+      </div>
+
+      <div class="comparison-card">
+        <h4>With Extra Payment (Reduce EMI)</h4>
+        <div class="comparison-item">
+          <span class="label">Monthly EMI</span>
+          <span class="value">₹ {{ comparison.withExtraPaymentReduceEmi.emi | formatCurrency }}</span>
+          <span class="saving">
+            Save ₹ {{ (comparison.original.emi - comparison.withExtraPaymentReduceEmi.emi) | formatCurrency }}/month
+          </span>
+        </div>
+        <div class="comparison-item">
+          <span class="label">Tenure (Months)</span>
+          <span class="value">{{ comparison.withExtraPaymentReduceEmi.schedule.length }}</span>
+        </div>
+        <div class="comparison-item">
+          <span class="label">Total Interest</span>
+          <span class="value highlight">₹ {{ comparison.withExtraPaymentReduceEmi.totalInterest | formatCurrency }}</span>
+          <span class="saving">
+            Save ₹ {{ (comparison.original.totalInterest - comparison.withExtraPaymentReduceEmi.totalInterest) | formatCurrency }}
+          </span>
+        </div>
+        <div class="comparison-item">
+          <span class="label">Total Payable</span>
+          <span class="value">₹ {{ comparison.withExtraPaymentReduceEmi.totalPayable | formatCurrency }}</span>
+        </div>
+      </div>
+
+      <div class="comparison-card">
+        <h4>With Extra Payment (Reduce Tenure)</h4>
+        <div class="comparison-item">
+          <span class="label">Monthly EMI</span>
+          <span class="value">₹ {{ comparison.withExtraPaymentReduceTenure.emi | formatCurrency }}</span>
+        </div>
+        <div class="comparison-item">
+          <span class="label">Tenure (Months)</span>
+          <span class="value">{{ comparison.withExtraPaymentReduceTenure.schedule.length }}</span>
+          <span class="saving">
+            Finish {{ comparison.original.schedule.length - comparison.withExtraPaymentReduceTenure.schedule.length }} months early
+          </span>
+        </div>
+        <div class="comparison-item">
+          <span class="label">Total Interest</span>
+          <span class="value highlight">₹ {{ comparison.withExtraPaymentReduceTenure.totalInterest | formatCurrency }}</span>
+          <span class="saving">
+            Save ₹ {{ (comparison.original.totalInterest - comparison.withExtraPaymentReduceTenure.totalInterest) | formatCurrency }}
+          </span>
+        </div>
+        <div class="comparison-item">
+          <span class="label">Total Payable</span>
+          <span class="value">₹ {{ comparison.withExtraPaymentReduceTenure.totalPayable | formatCurrency }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,32 @@
+<div class="table-panel">
+  <div class="table-header">
+    <h2>Amortization Schedule</h2>
+    <span class="row-count">{{ schedule.length }} months</span>
+  </div>
+  <div class="table-container">
+    <table class="amortization-table">
+      <thead>
+        <tr>
+          <th>Due Date</th>
+          <th>Opening Balance</th>
+          <th>EMI</th>
+          <th>Interest</th>
+          <th>Principal</th>
+          <th>Closing Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of schedule; track row.month; let i = $index) {
+          <tr [class.alternate]="i % 2 === 1">
+            <td class="month-col">{{ row.dueDate }}</td>
+            <td class="number">{{ row.opening | formatCurrency }}</td>
+            <td class="number">{{ row.emi | formatCurrency }}</td>
+            <td class="number interest">{{ row.interest | formatCurrency }}</td>
+            <td class="number principal">{{ row.principal | formatCurrency }}</td>
+            <td class="number">{{ row.closing | formatCurrency }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

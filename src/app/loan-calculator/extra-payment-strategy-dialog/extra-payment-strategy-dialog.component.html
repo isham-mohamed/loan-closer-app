@@ -1,0 +1,23 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick()">
+    <div class="modal-content" (click)="onContentClick($event)">
+      <h3>Extra Payment Strategy</h3>
+      <p>
+        How would you like to use the extra payment of
+        <strong>₹ {{ extraPaymentAmount | formatCurrency }}</strong
+        >?
+      </p>
+
+      <div class="strategy-options">
+        <button class="strategy-btn" (click)="selectStrategy('reduce-emi')">
+          <div class="strategy-title">Reduce Monthly EMI</div>
+          <div class="strategy-desc">Keep the same tenure, pay less each month</div>
+        </button>
+        <button class="strategy-btn" (click)="selectStrategy('reduce-tenure')">
+          <div class="strategy-title">Reduce Tenure</div>
+          <div class="strategy-desc">Keep the same EMI, finish loan early</div>
+        </button>
+      </div>
+    </div>
+  </div>
+}

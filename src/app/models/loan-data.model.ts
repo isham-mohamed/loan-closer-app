@@ -4,7 +4,10 @@ export interface LoanInput {
   tenureYears: number | null;
   tenureMonths: number | null;
   startDate: string | null;
+  extraPayment?: number | null;
 }
+
+export type ExtraPaymentStrategy = 'reduce-emi' | 'reduce-tenure' | null;
 
 export interface AmortizationRow {
   month: number;
@@ -23,6 +26,13 @@ export interface LoanCalculationResult {
   schedule: AmortizationRow[];
 }
 
+export interface ExtraPaymentComparison {
+  original: LoanCalculationResult;
+  withExtraPaymentReduceEmi: LoanCalculationResult;
+  withExtraPaymentReduceTenure: LoanCalculationResult;
+}
+
 export interface LoanData extends LoanInput {
   result?: LoanCalculationResult;
+  comparison?: ExtraPaymentComparison;
 }

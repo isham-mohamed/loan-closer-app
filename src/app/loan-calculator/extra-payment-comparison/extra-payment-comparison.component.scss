@@ -1,0 +1,132 @@
+.comparison-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 999;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  background: var(--card-bg);
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--text-primary);
+  }
+
+  .btn-sm {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 24px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.comparison-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+}
+
+.comparison-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+
+    &.highlight {
+      color: #e74c3c;
+    }
+  }
+
+  .saving {
+    font-size: 12px;
+    color: #27ae60;
+    font-weight: 500;
+    margin-top: 4px;
+  }
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary {
+  background: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+
+  &:hover {
+    background: var(--border-color);
+  }
+}
+
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 12px;
+}

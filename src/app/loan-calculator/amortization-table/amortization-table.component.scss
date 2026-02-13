@@ -1,0 +1,131 @@
+/* Host is the flex child of .main-content – must shrink so inner scroll works */
+:host {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.table-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-primary);
+  }
+}
+
+.row-count {
+  background: #667eea;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.table-container {
+  flex: 1;
+  min-height: 0; /* Required for flex child to scroll */
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--shadow);
+  border: 1px solid var(--border-color);
+  overflow: auto;
+}
+
+.amortization-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  color: var(--text-primary);
+
+  thead {
+    position: sticky;
+    top: 0;
+    background: var(--input-bg);
+    z-index: 10;
+  }
+
+  th {
+    padding: 14px 12px;
+    text-align: right;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border-color);
+    letter-spacing: 0.3px;
+    font-size: 14px;
+
+    &:first-child {
+      text-align: center;
+    }
+  }
+
+  td {
+    padding: 12px;
+    text-align: right;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-weight: 500;
+
+    &.month-col {
+      text-align: center;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    &.number {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+
+    &.interest {
+      color: #d69e2e;
+      font-weight: 500;
+    }
+
+    &.principal {
+      color: #38a169;
+      font-weight: 500;
+    }
+  }
+
+  tbody tr {
+    &.alternate {
+      background: var(--bg-tertiary);
+    }
+
+    &:hover {
+      background: var(--input-bg);
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .table-panel {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 640px) {
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
