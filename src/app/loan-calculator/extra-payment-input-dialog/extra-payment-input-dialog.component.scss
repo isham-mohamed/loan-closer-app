@@ -1,0 +1,159 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 60px var(--shadow);
+
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: var(--text-primary);
+  }
+}
+
+.desc {
+  margin: 0 0 20px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+}
+
+.timing-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timing-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary);
+
+  input[type='radio'] {
+    cursor: pointer;
+  }
+
+  &.timing-option-inline {
+    flex-wrap: wrap;
+
+    .month-input {
+      width: 64px;
+      padding: 6px 8px;
+      font-size: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      margin: 0 4px;
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--input-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+
+  &:focus-within {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text-primary);
+    outline: none;
+  }
+
+  .currency {
+    padding: 0 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 14px;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+
+  &:hover {
+    filter: brightness(1.05);
+  }
+}
+
+.btn-secondary {
+  background: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+
+  &:hover {
+    background: var(--border-color);
+  }
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+
+  &:hover {
+    background: var(--input-bg);
+  }
+}

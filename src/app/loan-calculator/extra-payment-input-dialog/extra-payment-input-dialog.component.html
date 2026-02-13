@@ -1,0 +1,53 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="onOverlayClick()">
+    <div class="modal-content" (click)="onContentClick($event)">
+      <h3>One-time extra payment</h3>
+      <p class="desc">Add an amount you plan to pay towards the principal (e.g. a bonus or lump sum). Choose when you'll pay it to see how it affects EMI or tenure.</p>
+
+      <div class="form-group">
+        <label>Extra payment amount</label>
+        <div class="input-wrapper">
+          <span class="currency">₹</span>
+          <input
+            type="text"
+            [value]="display"
+            (input)="onInput($event)"
+            placeholder="e.g. 50,000"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>When do you pay this?</label>
+        <div class="timing-options">
+          <label class="timing-option">
+            <input type="radio" name="when" [value]="true" [(ngModel)]="atStart" />
+            <span>At loan start</span>
+          </label>
+          <label class="timing-option timing-option-inline">
+            <input type="radio" name="when" [value]="false" [(ngModel)]="atStart" />
+            <span>After</span>
+            <input
+              type="number"
+              class="month-input"
+              [ngModel]="afterMonths"
+              (ngModelChange)="onMonthChange($event)"
+              min="1"
+              max="360"
+              [disabled]="atStart"
+            />
+            <span>months</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        @if (hasValue) {
+          <button type="button" class="btn btn-outline" (click)="onClear()">Clear</button>
+        }
+        <button type="button" class="btn btn-secondary" (click)="onClose()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="onApply()">Apply</button>
+      </div>
+    </div>
+  </div>
+}

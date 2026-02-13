@@ -9,17 +9,26 @@
         [tenureYears]="tenureYears"
         [tenureMonths]="tenureMonths"
         [startDate]="startDate"
-        [extraPaymentDisplay]="extraPaymentDisplay"
-        [hasExtraPayment]="!!extraPayment"
         (principalChange)="onPrincipalChange($event)"
         (annualRateChange)="annualRate = $event"
         (tenureYearsChange)="tenureYears = $event"
         (tenureMonthsChange)="tenureMonths = $event"
         (startDateChange)="startDate = $event"
-        (extraPaymentChange)="onExtraPaymentChange($event)"
         (calculate)="calculate()"
         (reset)="resetAll()"
       />
+
+      <div class="extra-payment-row">
+        <button type="button" class="btn btn-extra" (click)="openExtraPaymentDialog()">
+          {{ extraPayment ? 'Edit' : 'Add' }} one-time extra payment
+        </button>
+        @if (extraPayment && extraPayment > 0) {
+          <span class="extra-badge">₹ {{ extraPaymentDisplay }}</span>
+          <button type="button" class="btn btn-compare" (click)="compareWithExtraPayment()">
+            Compare
+          </button>
+        }
+      </div>
 
       @if (emi > 0) {
         <app-loan-summary
@@ -36,14 +45,16 @@
   </div>
 </div>
 
-<app-extra-payment-strategy-dialog
-  [visible]="showStrategyDialog"
-  [extraPaymentAmount]="extraPayment ?? 0"
-  (strategySelected)="onStrategySelected($event)"
-  (closed)="closeStrategyDialog()"
+<app-extra-payment-input-dialog
+  [visible]="showExtraPaymentDialog"
+  [initialAmount]="extraPayment"
+  [initialDisplay]="extraPaymentDisplay"
+  [initialAtMonth]="extraPaymentAtMonth"
+  (apply)="onExtraPaymentApply($event)"
+  (closed)="showExtraPaymentDialog = false"
 />
 
-@if (comparison && !showStrategyDialog) {
+@if (comparison) {
   <app-extra-payment-comparison
     [comparison]="comparison"
     (close)="clearComparison()"

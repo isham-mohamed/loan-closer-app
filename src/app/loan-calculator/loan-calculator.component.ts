@@ -5,7 +5,6 @@ import { ThemeService } from '../services/theme.service';
 import {
   AmortizationRow,
   ExtraPaymentComparison,
-  ExtraPaymentStrategy,
   LoanCalculationResult,
   LoanInput,
 } from '../models/loan-data.model';
@@ -13,7 +12,7 @@ import { CalculatorHeaderComponent } from './calculator-header/calculator-header
 import { LoanFormComponent } from './loan-form/loan-form.component';
 import { LoanSummaryComponent } from './loan-summary/loan-summary.component';
 import { AmortizationTableComponent } from './amortization-table/amortization-table.component';
-import { ExtraPaymentStrategyDialogComponent } from './extra-payment-strategy-dialog/extra-payment-strategy-dialog.component';
+import { ExtraPaymentApplied, ExtraPaymentInputDialogComponent } from './extra-payment-input-dialog/extra-payment-input-dialog.component';
 import { ExtraPaymentComparisonComponent } from './extra-payment-comparison/extra-payment-comparison.component';
 
 const LOCALE = 'en-IN';
@@ -27,7 +26,7 @@ const LOCALE = 'en-IN';
     LoanFormComponent,
     LoanSummaryComponent,
     AmortizationTableComponent,
-    ExtraPaymentStrategyDialogComponent,
+    ExtraPaymentInputDialogComponent,
     ExtraPaymentComparisonComponent,
   ],
   templateUrl: './loan-calculator.component.html',
@@ -42,15 +41,16 @@ export class LoanCalculatorComponent implements OnInit {
   startDate = this.getTodayDate();
   extraPayment: number | null = null;
   extraPaymentDisplay = '';
+  /** 0 = at loan start, 1+ = after that many months */
+  extraPaymentAtMonth = 0;
 
   emi = 0;
   totalPayable = 0;
   totalInterest = 0;
   schedule: AmortizationRow[] = [];
 
-  showStrategyDialog = false;
+  showExtraPaymentDialog = false;
   comparison: ExtraPaymentComparison | null = null;
-  selectedStrategy: ExtraPaymentStrategy = null;
 
   constructor(
     private loanService: LoanService,
@@ -72,12 +72,7 @@ export class LoanCalculatorComponent implements OnInit {
     this.totalInterest = result.totalInterest;
     this.totalPayable = result.totalPayable;
     this.schedule = result.schedule;
-
-    if (this.extraPayment && this.extraPayment > 0) {
-      this.showStrategyDialog = true;
-    } else {
-      this.comparison = null;
-    }
+    this.comparison = null;
 
     this.saveData();
   }
@@ -91,11 +86,32 @@ export class LoanCalculatorComponent implements OnInit {
     this.startDate = this.getTodayDate();
     this.extraPayment = null;
     this.extraPaymentDisplay = '';
+    this.extraPaymentAtMonth = 0;
     this.resetResults();
-    this.showStrategyDialog = false;
+    this.showExtraPaymentDialog = false;
     this.comparison = null;
-    this.selectedStrategy = null;
     this.loanService.clearData();
+  }
+
+  openExtraPaymentDialog(): void {
+    this.showExtraPaymentDialog = true;
+  }
+
+  onExtraPaymentApply(payload: ExtraPaymentApplied): void {
+    this.extraPayment = payload.amount;
+    this.extraPaymentDisplay =
+      payload.amount != null && payload.amount > 0
+        ? payload.amount.toLocaleString(LOCALE)
+        : '';
+    this.extraPaymentAtMonth = payload.atMonth ?? 0;
+  }
+
+  compareWithExtraPayment(): void {
+    if (!this.extraPayment || this.extraPayment <= 0) return;
+    if (this.schedule.length === 0) {
+      this.calculate();
+    }
+    this.calculateComparison();
   }
 
   onPrincipalChange(event: Event): void {
@@ -112,47 +128,59 @@ export class LoanCalculatorComponent implements OnInit {
     }
   }
 
-  onExtraPaymentChange(event: Event): void {
-    const input = (event.target as HTMLInputElement).value.replace(/,/g, '');
-    if (!input) {
-      this.extraPayment = null;
-      this.extraPaymentDisplay = '';
-      return;
-    }
-    const num = parseInt(input, 10);
-    if (!isNaN(num) && num > 0) {
-      this.extraPayment = num;
-      this.extraPaymentDisplay = num.toLocaleString(LOCALE);
-    }
-  }
-
-  onStrategySelected(strategy: ExtraPaymentStrategy): void {
-    this.selectedStrategy = strategy;
-    this.calculateComparison();
-    this.showStrategyDialog = false;
-  }
-
-  closeStrategyDialog(): void {
-    this.showStrategyDialog = false;
-  }
-
   clearComparison(): void {
     this.comparison = null;
-    this.selectedStrategy = null;
-    this.extraPayment = null;
-    this.extraPaymentDisplay = '';
+  }
+
+  private getEffectivePrincipalAndRemainingMonths(input: LoanInput): {
+    principal: number;
+    remainingMonths: number;
+    originalEmi: number;
+  } | null {
+    const totalMonths = this.getTotalMonths(input);
+    if (totalMonths <= 0) return null;
+
+    const original = this.loanService.calculateLoan(input);
+
+    if (this.extraPaymentAtMonth === 0) {
+      const principal = (input.principal ?? 0) - (this.extraPayment ?? 0);
+      return principal <= 0
+        ? null
+        : { principal, remainingMonths: totalMonths, originalEmi: original.emi };
+    }
+
+    if (this.schedule.length < this.extraPaymentAtMonth) return null;
+    const row = this.schedule[this.extraPaymentAtMonth - 1];
+    const balanceAfter = row.closing;
+    const principal = balanceAfter - (this.extraPayment ?? 0);
+    const remainingMonths = totalMonths - this.extraPaymentAtMonth;
+    return principal <= 0 || remainingMonths <= 0
+      ? null
+      : { principal, remainingMonths, originalEmi: original.emi };
   }
 
   private calculateComparison(): void {
     const input = this.buildLoanInput();
     const original = this.loanService.calculateLoan(input);
+    const effective = this.getEffectivePrincipalAndRemainingMonths(input);
+
+    if (!effective) {
+      this.comparison = {
+        original,
+        withExtraPaymentReduceEmi: original,
+        withExtraPaymentReduceTenure: original,
+      };
+      return;
+    }
 
     const inputReduceEmi = {
       ...input,
-      principal: (input.principal || 0) - (this.extraPayment || 0),
+      principal: effective.principal,
+      tenureMonths: effective.remainingMonths,
+      tenureYears: null,
     };
     const withExtraPaymentReduceEmi = this.loanService.calculateLoan(inputReduceEmi);
-    const withExtraPaymentReduceTenure = this.calculateWithReducedTenure(input);
+    const withExtraPaymentReduceTenure = this.calculateWithReducedTenure(input, effective);
 
     this.comparison = {
       original,
@@ -161,26 +189,46 @@ export class LoanCalculatorComponent implements OnInit {
     };
   }
 
-  private calculateWithReducedTenure(input: LoanInput): LoanCalculationResult {
+  private calculateWithReducedTenure(
+    input: LoanInput,
+    effective?: { principal: number; remainingMonths: number; originalEmi: number } | null,
+  ): LoanCalculationResult {
     if (!this.extraPayment || this.extraPayment <= 0) {
       return this.loanService.calculateLoan(input);
     }
 
-    const tempMonths = this.getTotalMonths(input);
+    const eff =
+      effective ?? this.getEffectivePrincipalAndRemainingMonths(input);
+    if (!eff) return this.loanService.calculateLoan(input);
 
-    for (let m = tempMonths; m >= 1; m--) {
-      const tempInput = { ...input, tenureMonths: m };
-      const tempResult = this.loanService.calculateLoan(tempInput);
+    const { principal: reducedPrincipal, remainingMonths, originalEmi } = eff;
+    const emi = originalEmi > 0 ? originalEmi : this.loanService.calculateLoan(input).emi;
 
-      if (
-        tempResult.totalPayable + this.extraPayment >=
-        this.loanService.calculateLoan(input).totalPayable
-      ) {
-        return tempResult;
-      }
+    if (emi <= 0 || reducedPrincipal <= 0) {
+      return this.loanService.calculateLoan(input);
     }
 
-    return this.loanService.calculateLoan(input);
+    const annualRate = input.annualRate ?? 0;
+    const r = annualRate / 100 / 12;
+
+    const term = 1 - (reducedPrincipal * r) / emi;
+    if (term <= 0 || term >= 1) {
+      return this.loanService.calculateLoan({
+        ...input,
+        principal: reducedPrincipal,
+        tenureMonths: remainingMonths,
+        tenureYears: null,
+      });
+    }
+    const n = Math.ceil(-Math.log(term) / Math.log(1 + r));
+    const tenureMonths = Math.max(1, Math.min(n, remainingMonths));
+
+    return this.loanService.calculateLoan({
+      ...input,
+      principal: reducedPrincipal,
+      tenureMonths,
+      tenureYears: null,
+    });
   }
 
   private getTotalMonths(input: LoanInput): number {
@@ -203,6 +251,7 @@ export class LoanCalculatorComponent implements OnInit {
     this.extraPaymentDisplay = data.extraPayment
       ? data.extraPayment.toLocaleString(LOCALE)
       : '';
+    this.extraPaymentAtMonth = data.extraPaymentAtMonth ?? 0;
 
     if (data.result) {
       this.emi = data.result.emi;
@@ -245,6 +294,7 @@ export class LoanCalculatorComponent implements OnInit {
       tenureMonths: this.tenureMonths,
       startDate: this.startDate,
       extraPayment: this.extraPayment,
+      extraPaymentAtMonth: this.extraPaymentAtMonth,
     };
   }
 

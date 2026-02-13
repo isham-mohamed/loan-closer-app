@@ -102,6 +102,57 @@ $dark-theme: (
   gap: 20px;
 }
 
+.extra-payment-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-extra {
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--input-bg);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+  }
+}
+
+.extra-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.btn-compare {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  background: #667eea;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #5a6fd6;
+    filter: brightness(1.05);
+  }
+}
+
 @media (max-width: 1024px) {
   .main-content {
     flex-direction: column;
