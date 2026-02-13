@@ -24,8 +24,8 @@
         </button>
         @if (extraPayment && extraPayment > 0) {
           <span class="extra-badge">₹ {{ extraPaymentDisplay }}</span>
-          <button type="button" class="btn btn-compare" (click)="compareWithExtraPayment()">
-            Compare
+          <button type="button" class="btn btn-compare" (click)="openComparisonSummary()">
+            Comparison Summary
           </button>
         }
       </div>
@@ -42,6 +42,7 @@
     @if (displaySchedule.length) {
       <app-amortization-table
         [schedule]="displaySchedule"
+        [originalSchedule]="schedule"
         [comparison]="comparison"
         [extraPaymentAmount]="extraPayment"
         [extraPaymentAtMonth]="extraPaymentAtMonth"
@@ -67,11 +68,11 @@
   (closed)="showExtraPaymentDialog = false"
 />
 
-@if (comparison) {
+@if (showComparisonPanel && comparison) {
   <app-extra-payment-comparison
     [comparison]="comparison"
     [extraPaymentAmount]="extraPayment"
     [extraPaymentAtMonth]="extraPaymentAtMonth"
-    (close)="clearComparison()"
+    (close)="closeComparisonPanel()"
   />
 }

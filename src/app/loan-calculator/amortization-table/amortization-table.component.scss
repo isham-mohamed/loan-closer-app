@@ -74,9 +74,14 @@
     color: var(--text-primary);
     transition: all 0.2s ease;
 
-    &:hover {
+    &:hover:not(:disabled) {
       border-color: #667eea;
       background: rgba(102, 126, 234, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     &.active {
@@ -202,10 +207,21 @@
     min-width: 140px;
   }
 
+  .th-numeric {
+    min-width: 100px;
+  }
+
   .notes-col {
     text-align: left;
     font-size: 12px;
     font-weight: 500;
+  }
+
+  .change-col {
+    &.positive {
+      color: #0d8050;
+      font-weight: 600;
+    }
   }
 
   .extra-badge {

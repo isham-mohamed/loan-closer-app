@@ -11,6 +11,7 @@ import { AmortizationRow, ExtraPaymentComparison, ExtraPaymentStrategy } from '.
 })
 export class AmortizationTableComponent {
   @Input() schedule: AmortizationRow[] = [];
+  @Input() originalSchedule: AmortizationRow[] = [];
   @Input() comparison: ExtraPaymentComparison | null = null;
   @Input() extraPaymentAmount: number | null = null;
   @Input() extraPaymentAtMonth = 0;
@@ -26,6 +27,10 @@ export class AmortizationTableComponent {
     return this.comparison != null;
   }
 
+  get hasExtraPayment(): boolean {
+    return this.extraPaymentAmount != null && this.extraPaymentAmount > 0;
+  }
+
   get extraPaymentDateDisplay(): string {
     if (this.extraPaymentDate) return this.extraPaymentDate;
     return '';
@@ -37,5 +42,18 @@ export class AmortizationTableComponent {
 
   isExtraPaymentRow(row: AmortizationRow): boolean {
     return this.isShowingOriginalSchedule && this.extraPaymentAtMonth > 0 && row.month === this.extraPaymentAtMonth;
+  }
+
+  /** Original closing balance for the same month (for Change column when viewing a scenario) */
+  getOriginalClosing(month: number): number | null {
+    const row = this.originalSchedule.find((r) => r.month === month);
+    return row != null ? row.closing : null;
+  }
+
+  /** Change vs original: positive = you owe less (savings) */
+  getChangeVsOriginal(row: AmortizationRow): number | null {
+    const orig = this.getOriginalClosing(row.month);
+    if (orig == null) return null;
+    return Math.round((orig - row.closing) * 100) / 100;
   }
 }

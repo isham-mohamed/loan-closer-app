@@ -4,7 +4,7 @@
     <span class="row-count">{{ schedule.length }} months</span>
   </div>
 
-  @if (hasComparison) {
+  @if (hasExtraPayment) {
     <div class="strategy-bar">
       <div class="strategy-toggle">
         <span class="strategy-label">View scenario:</span>
@@ -12,7 +12,8 @@
           type="button"
           class="strategy-btn"
           [class.active]="selectedStrategy === 'reduce-emi'"
-          (click)="selectStrategy('reduce-emi')"
+          [disabled]="!hasComparison"
+          (click)="hasComparison && selectStrategy('reduce-emi')"
         >
           Reduce EMI
         </button>
@@ -20,30 +21,28 @@
           type="button"
           class="strategy-btn"
           [class.active]="selectedStrategy === 'reduce-tenure'"
-          (click)="selectStrategy('reduce-tenure')"
+          [disabled]="!hasComparison"
+          (click)="hasComparison && selectStrategy('reduce-tenure')"
         >
           Reduce Tenure
         </button>
       </div>
       <div class="scenario-summary">
-        <span class="summary-item">EMI: ₹ {{ displayEmi | formatCurrency }}/month</span>
-        <span class="summary-item">Tenure: {{ displayTenureMonths }} months</span>
-        @if (extraPaymentAmount != null && extraPaymentAmount > 0) {
-          <span class="extra-note">
-            After extra payment of ₹ {{ extraPaymentAmount | formatCurrency }}
-            @if (extraPaymentDateDisplay) {
-              on {{ extraPaymentDateDisplay }}
-            }
-          </span>
+        @if (hasComparison) {
+          <span class="summary-item">EMI: ₹ {{ displayEmi | formatCurrency }}/month</span>
+          <span class="summary-item">Tenure: {{ displayTenureMonths }} months</span>
+          @if (extraPaymentAmount != null && extraPaymentAmount > 0) {
+            <span class="extra-note">
+              After extra payment of ₹ {{ extraPaymentAmount | formatCurrency }}
+              @if (extraPaymentDateDisplay) {
+                on {{ extraPaymentDateDisplay }}
+              }
+            </span>
+          }
+        } @else {
+          <span class="extra-note">Open Comparison Summary to see scenarios</span>
         }
       </div>
-    </div>
-  }
-
-  @if (!hasComparison && extraPaymentAmount != null && extraPaymentAmount > 0 && extraPaymentDateDisplay) {
-    <div class="extra-payment-banner">
-      One-time extra payment: ₹ {{ extraPaymentAmount | formatCurrency }} on {{ extraPaymentDateDisplay }}
-      (click Compare to see impact)
     </div>
   }
 
@@ -57,6 +56,10 @@
           <th>Interest</th>
           <th>Principal</th>
           <th>Closing Balance</th>
+          @if (hasComparison) {
+            <th class="th-numeric">Actual</th>
+            <th class="th-numeric">Change</th>
+          }
           @if (isShowingOriginalSchedule && extraPaymentAmount != null && extraPaymentAmount > 0) {
             <th class="th-notes">Note</th>
           }
@@ -74,6 +77,17 @@
             <td class="number interest">{{ row.interest | formatCurrency }}</td>
             <td class="number principal">{{ row.principal | formatCurrency }}</td>
             <td class="number">{{ row.closing | formatCurrency }}</td>
+            @if (hasComparison) {
+              <td class="number">{{ row.closing | formatCurrency }}</td>
+              <td class="number change-col">
+                @let change = getChangeVsOriginal(row);
+                @if (change !== null) {
+                  <span [class.positive]="change > 0">₹ {{ change | formatCurrency }}</span>
+                } @else {
+                  —
+                }
+              </td>
+            }
             @if (isShowingOriginalSchedule && extraPaymentAmount != null && extraPaymentAmount > 0) {
               <td class="notes-col">
                 @if (isExtraPaymentRow(row)) {

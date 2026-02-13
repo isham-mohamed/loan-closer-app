@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { LoanService } from '../services/loan.service';
 import { ThemeService } from '../services/theme.service';
 import {
@@ -39,7 +39,7 @@ function addMonthsToDate(dateStr: string, months: number): string {
   templateUrl: './loan-calculator.component.html',
   styleUrls: ['./loan-calculator.component.scss'],
 })
-export class LoanCalculatorComponent implements OnInit {
+export class LoanCalculatorComponent implements OnInit, OnDestroy {
   principal: number | null = null;
   principalDisplay = '';
   annualRate: number | null = null;
@@ -60,6 +60,8 @@ export class LoanCalculatorComponent implements OnInit {
 
   showExtraPaymentDialog = false;
   comparison: ExtraPaymentComparison | null = null;
+  /** Opens the comparison summary panel (bottom sheet) */
+  showComparisonPanel = false;
   /** Which scenario is shown in the amortization table when comparison exists */
   selectedStrategy: ExtraPaymentStrategy = 'reduce-tenure';
 
@@ -102,6 +104,10 @@ export class LoanCalculatorComponent implements OnInit {
     this.loadData();
   }
 
+  ngOnDestroy(): void {
+    this.theme.unregisterElement(this.el.nativeElement);
+  }
+
   calculate(): void {
     const input = this.buildLoanInput();
     const result = this.loanService.calculateLoan(input);
@@ -111,7 +117,9 @@ export class LoanCalculatorComponent implements OnInit {
     this.totalPayable = result.totalPayable;
     this.schedule = result.schedule;
     this.comparison = null;
-
+    if (this.extraPayment != null && this.extraPayment > 0) {
+      this.calculateComparison();
+    }
     this.saveData();
   }
 
@@ -129,6 +137,7 @@ export class LoanCalculatorComponent implements OnInit {
     this.selectedStrategy = 'reduce-tenure';
     this.resetResults();
     this.showExtraPaymentDialog = false;
+    this.showComparisonPanel = false;
     this.comparison = null;
     this.loanService.clearData();
   }
@@ -145,14 +154,20 @@ export class LoanCalculatorComponent implements OnInit {
         : '';
     this.extraPaymentAtMonth = payload.atMonth ?? 0;
     this.extraPaymentDate = payload.paymentDate ?? null;
+    if (this.extraPayment != null && this.extraPayment > 0 && this.schedule.length > 0) {
+      this.calculateComparison();
+    }
   }
 
-  compareWithExtraPayment(): void {
+  /** Run comparison and open the Comparison Summary panel */
+  openComparisonSummary(): void {
     if (!this.extraPayment || this.extraPayment <= 0) return;
     if (this.schedule.length === 0) {
       this.calculate();
     }
     this.calculateComparison();
+    this.showComparisonPanel = true;
+    this.saveData();
   }
 
   onPrincipalChange(event: Event): void {
@@ -169,8 +184,9 @@ export class LoanCalculatorComponent implements OnInit {
     }
   }
 
-  clearComparison(): void {
-    this.comparison = null;
+  closeComparisonPanel(): void {
+    this.showComparisonPanel = false;
+    this.saveData();
   }
 
   onStrategyChange(strategy: ExtraPaymentStrategy): void {
