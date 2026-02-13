@@ -5,7 +5,7 @@
   right: 0;
   background: var(--card-bg);
   border-top: 1px solid var(--border-color);
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
   z-index: 999;
   animation: slideUp 0.3s ease;
@@ -24,87 +24,129 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
+  padding: 20px 24px;
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   background: var(--card-bg);
+  z-index: 1;
 
   h2 {
     margin: 0;
     font-size: 20px;
+    font-weight: 600;
     color: var(--text-primary);
   }
 
   .btn-sm {
-    padding: 8px 12px;
-    font-size: 12px;
+    padding: 8px 14px;
+    font-size: 13px;
   }
 }
 
-.comparison-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+.extra-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.extra-summary-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.extra-summary-amount {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.extra-summary-when {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  background: var(--input-bg);
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.comparison-table-wrapper {
   padding: 24px;
-
-  @media (max-width: 1200px) {
-    grid-template-columns: 1fr;
-  }
+  overflow-x: auto;
 }
 
-.comparison-card {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 20px;
+.comparison-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 14px;
 
-  h4 {
-    margin: 0 0 16px 0;
-    font-size: 15px;
+  th,
+  td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+  }
+
+  thead th {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--bg-tertiary);
+  }
+
+  tbody tr:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .col-metric {
     font-weight: 600;
     color: var(--text-primary);
-    text-align: center;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-color);
-  }
-}
-
-.comparison-item {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-color);
-
-  &:last-child {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
+    width: 28%;
   }
 
-  .label {
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-weight: 500;
+  .col-original {
+    color: var(--text-primary);
+    width: 24%;
+  }
+
+  .col-option {
+    width: 24%;
+  }
+
+  .cell-value {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
     margin-bottom: 4px;
   }
 
-  .value {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-
-    &.highlight {
-      color: #e74c3c;
-    }
-  }
-
-  .saving {
+  .cell-delta {
+    display: inline-block;
     font-size: 12px;
-    color: #27ae60;
     font-weight: 500;
-    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+
+    &.positive {
+      color: #0d8050;
+      background: rgba(39, 174, 96, 0.12);
+    }
+
+    &.neutral {
+      color: var(--text-secondary);
+      background: var(--input-bg);
+    }
   }
 }
 
@@ -129,4 +171,42 @@
 .btn-sm {
   padding: 8px 12px;
   font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .comparison-table {
+    .col-metric {
+      width: 22%;
+    }
+
+    .col-original,
+    .col-option {
+      width: 26%;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .cell-value {
+      font-size: 13px;
+    }
+
+    .cell-delta {
+      font-size: 11px;
+      padding: 2px 6px;
+    }
+  }
+
+  .extra-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .extra-summary-amount {
+    font-size: 20px;
+  }
 }

@@ -11,8 +11,15 @@ import { ExtraPaymentComparison as ExtraPaymentComparisonModel } from '../../mod
 })
 export class ExtraPaymentComparisonComponent {
   @Input() comparison: ExtraPaymentComparisonModel | null = null;
+  @Input() extraPaymentAmount: number | null = null;
+  @Input() extraPaymentAtMonth = 0;
 
   @Output() close = new EventEmitter<void>();
+
+  get extraPaymentLabel(): string {
+    if (this.extraPaymentAtMonth === 0) return 'At loan start';
+    return `After ${this.extraPaymentAtMonth} month${this.extraPaymentAtMonth === 1 ? '' : 's'}`;
+  }
 
   onClose(): void {
     this.close.emit();

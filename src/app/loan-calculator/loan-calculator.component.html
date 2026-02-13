@@ -57,6 +57,8 @@
 @if (comparison) {
   <app-extra-payment-comparison
     [comparison]="comparison"
+    [extraPaymentAmount]="extraPayment"
+    [extraPaymentAtMonth]="extraPaymentAtMonth"
     (close)="clearComparison()"
   />
 }
