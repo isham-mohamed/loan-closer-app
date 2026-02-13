@@ -7,6 +7,23 @@ const LOCALE = 'en-IN';
 export interface ExtraPaymentApplied {
   amount: number | null;
   atMonth: number;
+  paymentDate: string | null;
+}
+
+/** Add months to a YYYY-MM-DD date string. */
+function addMonthsToDate(dateStr: string, months: number): string {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().split('T')[0];
+}
+
+/** Months from start to payment date (1-based month index; 0 = same as start). */
+function monthsFromStart(startDateStr: string, paymentDateStr: string): number {
+  const start = new Date(startDateStr + 'T12:00:00');
+  const pay = new Date(paymentDateStr + 'T12:00:00');
+  if (pay <= start) return 0;
+  const months = (pay.getFullYear() - start.getFullYear()) * 12 + (pay.getMonth() - start.getMonth());
+  return Math.max(0, months);
 }
 
 @Component({
@@ -21,17 +38,20 @@ export class ExtraPaymentInputDialogComponent implements OnChanges {
   @Input() initialAmount: number | null = null;
   @Input() initialDisplay = '';
   @Input() initialAtMonth = 0;
+  @Input() initialPaymentDate: string | null = null;
+  /** Loan start date (YYYY-MM-DD) for min date and to derive atMonth from payment date. */
+  @Input() startDate = '';
 
   @Output() apply = new EventEmitter<ExtraPaymentApplied>();
   @Output() closed = new EventEmitter<void>();
 
   amount: number | null = null;
   display = '';
-  atStart = true;
-  afterMonths = 12;
+  /** Payment date (YYYY-MM-DD). */
+  paymentDate = '';
 
-  get atMonth(): number {
-    return this.atStart ? 0 : this.afterMonths;
+  get minPaymentDate(): string {
+    return this.startDate || new Date().toISOString().split('T')[0];
   }
 
   get hasValue(): boolean {
@@ -45,9 +65,14 @@ export class ExtraPaymentInputDialogComponent implements OnChanges {
       this.display =
         this.initialDisplay ||
         (hasAmount ? this.initialAmount!.toLocaleString(LOCALE) : '');
-      const m = this.initialAtMonth ?? 0;
-      this.atStart = m === 0;
-      this.afterMonths = m > 0 ? m : 12;
+      if (this.initialPaymentDate) {
+        this.paymentDate = this.initialPaymentDate;
+      } else if (this.startDate) {
+        const m = this.initialAtMonth ?? 0;
+        this.paymentDate = m === 0 ? this.startDate : addMonthsToDate(this.startDate, m);
+      } else {
+        this.paymentDate = new Date().toISOString().split('T')[0];
+      }
     }
   }
 
@@ -66,23 +91,18 @@ export class ExtraPaymentInputDialogComponent implements OnChanges {
   }
 
   onApply(): void {
-    this.apply.emit({ amount: this.amount, atMonth: this.atMonth });
+    const start = this.startDate || new Date().toISOString().split('T')[0];
+    const date = this.paymentDate || start;
+    const atMonth = this.paymentDate ? monthsFromStart(start, date) : 0;
+    this.apply.emit({ amount: this.amount, atMonth, paymentDate: this.paymentDate || null });
     this.closed.emit();
-  }
-
-  onMonthChange(v: number | string): void {
-    const n = typeof v === 'string' ? parseInt(v, 10) : v;
-    if (!isNaN(n) && n >= 1 && n <= 360) {
-      this.afterMonths = Math.floor(n);
-    }
   }
 
   onClear(): void {
     this.amount = null;
     this.display = '';
-    this.atStart = true;
-    this.afterMonths = 12;
-    this.apply.emit({ amount: null, atMonth: 0 });
+    this.paymentDate = this.minPaymentDate;
+    this.apply.emit({ amount: null, atMonth: 0, paymentDate: null });
     this.closed.emit();
   }
 

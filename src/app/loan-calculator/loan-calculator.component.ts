@@ -5,6 +5,7 @@ import { ThemeService } from '../services/theme.service';
 import {
   AmortizationRow,
   ExtraPaymentComparison,
+  ExtraPaymentStrategy,
   LoanCalculationResult,
   LoanInput,
 } from '../models/loan-data.model';
@@ -16,6 +17,12 @@ import { ExtraPaymentApplied, ExtraPaymentInputDialogComponent } from './extra-p
 import { ExtraPaymentComparisonComponent } from './extra-payment-comparison/extra-payment-comparison.component';
 
 const LOCALE = 'en-IN';
+
+function addMonthsToDate(dateStr: string, months: number): string {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().split('T')[0];
+}
 
 @Component({
   selector: 'app-loan-calculator',
@@ -43,6 +50,8 @@ export class LoanCalculatorComponent implements OnInit {
   extraPaymentDisplay = '';
   /** 0 = at loan start, 1+ = after that many months */
   extraPaymentAtMonth = 0;
+  /** Date of extra payment (YYYY-MM-DD) for display in schedule */
+  extraPaymentDate: string | null = null;
 
   emi = 0;
   totalPayable = 0;
@@ -51,6 +60,35 @@ export class LoanCalculatorComponent implements OnInit {
 
   showExtraPaymentDialog = false;
   comparison: ExtraPaymentComparison | null = null;
+  /** Which scenario is shown in the amortization table when comparison exists */
+  selectedStrategy: ExtraPaymentStrategy = 'reduce-tenure';
+
+  /** Schedule to show in amortization table (original or selected comparison scenario) */
+  get displaySchedule(): AmortizationRow[] {
+    if (!this.comparison) return this.schedule;
+    return this.selectedStrategy === 'reduce-emi'
+      ? this.comparison.withExtraPaymentReduceEmi.schedule
+      : this.comparison.withExtraPaymentReduceTenure.schedule;
+  }
+
+  get displayEmi(): number {
+    if (!this.comparison) return this.emi;
+    return this.selectedStrategy === 'reduce-emi'
+      ? this.comparison.withExtraPaymentReduceEmi.emi
+      : this.comparison.withExtraPaymentReduceTenure.emi;
+  }
+
+  get displayTenureMonths(): number {
+    if (!this.comparison) return this.schedule.length;
+    return this.selectedStrategy === 'reduce-emi'
+      ? this.comparison.withExtraPaymentReduceEmi.schedule.length
+      : this.comparison.withExtraPaymentReduceTenure.schedule.length;
+  }
+
+  /** True when the table is showing the original schedule (no comparison or not in comparison mode) */
+  get isShowingOriginalSchedule(): boolean {
+    return !this.comparison;
+  }
 
   constructor(
     private loanService: LoanService,
@@ -87,6 +125,8 @@ export class LoanCalculatorComponent implements OnInit {
     this.extraPayment = null;
     this.extraPaymentDisplay = '';
     this.extraPaymentAtMonth = 0;
+    this.extraPaymentDate = null;
+    this.selectedStrategy = 'reduce-tenure';
     this.resetResults();
     this.showExtraPaymentDialog = false;
     this.comparison = null;
@@ -104,6 +144,7 @@ export class LoanCalculatorComponent implements OnInit {
         ? payload.amount.toLocaleString(LOCALE)
         : '';
     this.extraPaymentAtMonth = payload.atMonth ?? 0;
+    this.extraPaymentDate = payload.paymentDate ?? null;
   }
 
   compareWithExtraPayment(): void {
@@ -130,6 +171,13 @@ export class LoanCalculatorComponent implements OnInit {
 
   clearComparison(): void {
     this.comparison = null;
+  }
+
+  onStrategyChange(strategy: ExtraPaymentStrategy): void {
+    if (strategy === 'reduce-emi' || strategy === 'reduce-tenure') {
+      this.selectedStrategy = strategy;
+      this.saveData();
+    }
   }
 
   private getEffectivePrincipalAndRemainingMonths(input: LoanInput): {
@@ -252,6 +300,14 @@ export class LoanCalculatorComponent implements OnInit {
       ? data.extraPayment.toLocaleString(LOCALE)
       : '';
     this.extraPaymentAtMonth = data.extraPaymentAtMonth ?? 0;
+    this.extraPaymentDate =
+      data.extraPaymentDate ??
+      (data.startDate && (data.extraPaymentAtMonth ?? 0) > 0
+        ? addMonthsToDate(data.startDate, data.extraPaymentAtMonth ?? 0)
+        : null);
+    if (data.selectedStrategy === 'reduce-emi' || data.selectedStrategy === 'reduce-tenure') {
+      this.selectedStrategy = data.selectedStrategy;
+    }
 
     if (data.result) {
       this.emi = data.result.emi;
@@ -276,6 +332,7 @@ export class LoanCalculatorComponent implements OnInit {
         schedule: this.schedule,
       },
       ...(this.comparison && { comparison: this.comparison }),
+      selectedStrategy: this.selectedStrategy,
     });
   }
 
@@ -295,6 +352,7 @@ export class LoanCalculatorComponent implements OnInit {
       startDate: this.startDate,
       extraPayment: this.extraPayment,
       extraPaymentAtMonth: this.extraPaymentAtMonth,
+      extraPaymentDate: this.extraPaymentDate,
     };
   }
 

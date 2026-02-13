@@ -4,8 +4,11 @@ export interface LoanInput {
   tenureYears: number | null;
   tenureMonths: number | null;
   startDate: string | null;
-  extraPayment?: number | null; /** 0 = at loan start, 1+ = after that many months */
+  extraPayment?: number | null;
+  /** 0 = at loan start, 1+ = after that many months */
   extraPaymentAtMonth?: number;
+  /** Date of one-time extra payment (YYYY-MM-DD). Used for display; atMonth used for calculation. */
+  extraPaymentDate?: string | null;
 }
 
 export type ExtraPaymentStrategy = 'reduce-emi' | 'reduce-tenure' | null;
@@ -36,4 +39,5 @@ export interface ExtraPaymentComparison {
 export interface LoanData extends LoanInput {
   result?: LoanCalculationResult;
   comparison?: ExtraPaymentComparison;
+  selectedStrategy?: ExtraPaymentStrategy;
 }

@@ -18,27 +18,16 @@
       </div>
 
       <div class="form-group">
-        <label>When do you pay this?</label>
-        <div class="timing-options">
-          <label class="timing-option">
-            <input type="radio" name="when" [value]="true" [(ngModel)]="atStart" />
-            <span>At loan start</span>
-          </label>
-          <label class="timing-option timing-option-inline">
-            <input type="radio" name="when" [value]="false" [(ngModel)]="atStart" />
-            <span>After</span>
-            <input
-              type="number"
-              class="month-input"
-              [ngModel]="afterMonths"
-              (ngModelChange)="onMonthChange($event)"
-              min="1"
-              max="360"
-              [disabled]="atStart"
-            />
-            <span>months</span>
-          </label>
+        <label>Date of payment</label>
+        <div class="input-wrapper">
+          <input
+            type="date"
+            [ngModel]="paymentDate"
+            (ngModelChange)="paymentDate = $event"
+            [min]="minPaymentDate"
+          />
         </div>
+        <p class="hint">Choose when you'll make the one-time payment. Must be on or after the loan start date.</p>
       </div>
 
       <div class="dialog-actions">

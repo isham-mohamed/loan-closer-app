@@ -3,6 +3,50 @@
     <h2>Amortization Schedule</h2>
     <span class="row-count">{{ schedule.length }} months</span>
   </div>
+
+  @if (hasComparison) {
+    <div class="strategy-bar">
+      <div class="strategy-toggle">
+        <span class="strategy-label">View scenario:</span>
+        <button
+          type="button"
+          class="strategy-btn"
+          [class.active]="selectedStrategy === 'reduce-emi'"
+          (click)="selectStrategy('reduce-emi')"
+        >
+          Reduce EMI
+        </button>
+        <button
+          type="button"
+          class="strategy-btn"
+          [class.active]="selectedStrategy === 'reduce-tenure'"
+          (click)="selectStrategy('reduce-tenure')"
+        >
+          Reduce Tenure
+        </button>
+      </div>
+      <div class="scenario-summary">
+        <span class="summary-item">EMI: ₹ {{ displayEmi | formatCurrency }}/month</span>
+        <span class="summary-item">Tenure: {{ displayTenureMonths }} months</span>
+        @if (extraPaymentAmount != null && extraPaymentAmount > 0) {
+          <span class="extra-note">
+            After extra payment of ₹ {{ extraPaymentAmount | formatCurrency }}
+            @if (extraPaymentDateDisplay) {
+              on {{ extraPaymentDateDisplay }}
+            }
+          </span>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!hasComparison && extraPaymentAmount != null && extraPaymentAmount > 0 && extraPaymentDateDisplay) {
+    <div class="extra-payment-banner">
+      One-time extra payment: ₹ {{ extraPaymentAmount | formatCurrency }} on {{ extraPaymentDateDisplay }}
+      (click Compare to see impact)
+    </div>
+  }
+
   <div class="table-container">
     <table class="amortization-table">
       <thead>
@@ -13,17 +57,35 @@
           <th>Interest</th>
           <th>Principal</th>
           <th>Closing Balance</th>
+          @if (isShowingOriginalSchedule && extraPaymentAmount != null && extraPaymentAmount > 0) {
+            <th class="th-notes">Note</th>
+          }
         </tr>
       </thead>
       <tbody>
         @for (row of schedule; track row.month; let i = $index) {
-          <tr [class.alternate]="i % 2 === 1">
+          <tr
+            [class.alternate]="i % 2 === 1"
+            [class.extra-payment-row]="isExtraPaymentRow(row)"
+          >
             <td class="month-col">{{ row.dueDate }}</td>
             <td class="number">{{ row.opening | formatCurrency }}</td>
             <td class="number">{{ row.emi | formatCurrency }}</td>
             <td class="number interest">{{ row.interest | formatCurrency }}</td>
             <td class="number principal">{{ row.principal | formatCurrency }}</td>
             <td class="number">{{ row.closing | formatCurrency }}</td>
+            @if (isShowingOriginalSchedule && extraPaymentAmount != null && extraPaymentAmount > 0) {
+              <td class="notes-col">
+                @if (isExtraPaymentRow(row)) {
+                  <span class="extra-badge">
+                    Extra payment: ₹ {{ extraPaymentAmount | formatCurrency }}
+                    @if (extraPaymentDateDisplay) {
+                      on {{ extraPaymentDateDisplay }}
+                    }
+                  </span>
+                }
+              </td>
+            }
           </tr>
         }
       </tbody>

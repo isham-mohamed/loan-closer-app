@@ -39,8 +39,19 @@
       }
     </div>
 
-    @if (schedule.length) {
-      <app-amortization-table [schedule]="schedule" />
+    @if (displaySchedule.length) {
+      <app-amortization-table
+        [schedule]="displaySchedule"
+        [comparison]="comparison"
+        [extraPaymentAmount]="extraPayment"
+        [extraPaymentAtMonth]="extraPaymentAtMonth"
+        [extraPaymentDate]="extraPaymentDate"
+        [selectedStrategy]="selectedStrategy"
+        [displayEmi]="displayEmi"
+        [displayTenureMonths]="displayTenureMonths"
+        [isShowingOriginalSchedule]="isShowingOriginalSchedule"
+        (strategyChange)="onStrategyChange($event)"
+      />
     }
   </div>
 </div>
@@ -50,6 +61,8 @@
   [initialAmount]="extraPayment"
   [initialDisplay]="extraPaymentDisplay"
   [initialAtMonth]="extraPaymentAtMonth"
+  [initialPaymentDate]="extraPaymentDate"
+  [startDate]="startDate"
   (apply)="onExtraPaymentApply($event)"
   (closed)="showExtraPaymentDialog = false"
 />
