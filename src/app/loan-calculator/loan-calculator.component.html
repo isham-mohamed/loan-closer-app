@@ -2,7 +2,16 @@
   <!-- Header -->
   <header class="header">
     <div class="header-content">
-      <h1>💰 Loan Calculator</h1>
+      <div class="header-top">
+        <h1>💰 Loan Calculator</h1>
+        <button
+          class="theme-toggle"
+          (click)="toggleTheme()"
+          [title]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+        >
+          {{ isDarkMode ? '☀️' : '🌙' }}
+        </button>
+      </div>
       <p>Calculate EMI, interest, and view amortization schedule</p>
     </div>
   </header>

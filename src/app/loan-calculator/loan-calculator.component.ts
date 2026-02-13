@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LoanService } from '../services/loan.service';
 import { AmortizationRow, LoanInput } from '../models/loan-data.model';
@@ -22,10 +22,43 @@ export class LoanCalculatorComponent implements OnInit {
   totalInterest = 0;
   schedule: AmortizationRow[] = [];
 
-  constructor(private loanService: LoanService) {}
+  isDarkMode = false;
+
+  constructor(
+    private loanService: LoanService,
+    private el: ElementRef,
+  ) {}
 
   ngOnInit() {
+    this.loadTheme();
     this.loadData();
+  }
+
+  loadTheme() {
+    const savedTheme = localStorage.getItem('themeMode');
+    if (savedTheme) {
+      this.isDarkMode = savedTheme === 'dark';
+    } else {
+      // Check system preference
+      this.isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    this.applyTheme();
+  }
+
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('themeMode', this.isDarkMode ? 'dark' : 'light');
+    this.applyTheme();
+  }
+
+  applyTheme() {
+    if (this.isDarkMode) {
+      this.el.nativeElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      this.el.nativeElement.setAttribute('data-theme', 'light');
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
   }
 
   loadData() {
