@@ -4,7 +4,8 @@ export interface LoanInput {
   tenureYears: number | null;
   tenureMonths: number | null;
   startDate: string | null;
-  extraPayment?: number | null;
+  extraPayment?: number | null; /** 0 = at loan start, 1+ = after that many months */
+  extraPaymentAtMonth?: number;
 }
 
 export type ExtraPaymentStrategy = 'reduce-emi' | 'reduce-tenure' | null;
