@@ -3,10 +3,12 @@ export interface LoanInput {
   annualRate: number | null;
   tenureYears: number | null;
   tenureMonths: number | null;
+  startDate: string | null;
 }
 
 export interface AmortizationRow {
   month: number;
+  dueDate: string;
   opening: number;
   emi: number;
   interest: number;

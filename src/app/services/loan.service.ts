@@ -79,7 +79,15 @@ export class LoanService {
     let balance = P;
     let totalInterest = 0;
 
+    // Parse start date or use today's date
+    const startDate = input.startDate ? new Date(input.startDate) : new Date();
+    const currentDate = new Date(startDate);
+
     for (let i = 1; i <= n; i++) {
+      // Move to next month for due date
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      const dueDate = currentDate.toISOString().split('T')[0];
+
       const interest = Math.round(balance * r * 100) / 100;
       // principal component may need to be adjusted on last payment
       let principalComponent = Math.round((result.emi - interest) * 100) / 100;
@@ -92,6 +100,7 @@ export class LoanService {
 
       const row: AmortizationRow = {
         month: i,
+        dueDate,
         opening: Math.round(balance * 100) / 100,
         emi: result.emi,
         interest,

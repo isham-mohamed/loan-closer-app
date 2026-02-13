@@ -17,6 +17,7 @@ export class LoanCalculatorComponent implements OnInit {
   annualRate: number | null = null;
   tenureYears: number | null = null;
   tenureMonths: number | null = null;
+  startDate: string = this.getTodayDate();
 
   // Results
   emi = 0;
@@ -66,6 +67,7 @@ export class LoanCalculatorComponent implements OnInit {
     this.annualRate = null;
     this.tenureYears = null;
     this.tenureMonths = null;
+    this.startDate = this.getTodayDate();
     this.resetResults();
     this.loanService.clearData();
   }
@@ -125,6 +127,7 @@ export class LoanCalculatorComponent implements OnInit {
     this.annualRate = data.annualRate || null;
     this.tenureYears = data.tenureYears || null;
     this.tenureMonths = data.tenureMonths || null;
+    this.startDate = data.startDate || this.getTodayDate();
 
     if (data.result) {
       this.emi = data.result.emi;
@@ -161,6 +164,12 @@ export class LoanCalculatorComponent implements OnInit {
       annualRate: this.annualRate,
       tenureYears: this.tenureYears,
       tenureMonths: this.tenureMonths,
+      startDate: this.startDate,
     };
+  }
+
+  private getTodayDate(): string {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   }
 }

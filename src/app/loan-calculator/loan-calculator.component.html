@@ -61,6 +61,13 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Loan Start Date</label>
+          <div class="input-wrapper">
+            <input type="date" [(ngModel)]="startDate" />
+          </div>
+        </div>
+
         <div class="form-actions">
           <button class="btn btn-primary" (click)="calculate()">Calculate</button>
           <button class="btn btn-secondary" (click)="resetAll()">Reset</button>
@@ -95,7 +102,7 @@
         <table class="amortization-table">
           <thead>
             <tr>
-              <th>Month</th>
+              <th>Due Date</th>
               <th>Opening Balance</th>
               <th>EMI</th>
               <th>Interest</th>
@@ -105,7 +112,7 @@
           </thead>
           <tbody>
             <tr *ngFor="let row of schedule; let i = index" [class.alternate]="i % 2 === 1">
-              <td class="month-col">{{ row.month }}</td>
+              <td class="month-col">{{ row.dueDate }}</td>
               <td class="number">{{ formatMoney(row.opening) }}</td>
               <td class="number">{{ formatMoney(row.emi) }}</td>
               <td class="number interest">{{ formatMoney(row.interest) }}</td>

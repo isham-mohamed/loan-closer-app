@@ -205,6 +205,10 @@ $dark-theme: (
     color: var(--text-secondary);
     letter-spacing: 0.3px;
   }
+
+  &:last-of-type {
+    margin-bottom: 20px;
+  }
 }
 
 .input-wrapper {
@@ -249,9 +253,14 @@ $dark-theme: (
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  margin-bottom: 16px;
 
   .form-group {
     margin-bottom: 0;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
   }
 }
 

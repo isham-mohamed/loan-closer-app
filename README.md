@@ -5,7 +5,8 @@ A modern, responsive Angular application for calculating loan EMI (Equated Month
 ## Features
 
 - ✨ **EMI Calculation** - Calculate monthly EMI with precision
-- 📊 **Amortization Schedule** - View detailed month-by-month payment breakdown
+- 📊 **Amortization Schedule** - View detailed month-by-month payment breakdown with actual due dates
+- 📅 **Loan Start Date** - Specify when your loan begins to see actual monthly payment due dates
 - 🎨 **Dark/Light Theme** - Toggle between dark and light modes with persistent preference
 - 💾 **Auto-Save** - Automatically saves calculation data to localStorage
 - 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
@@ -52,10 +53,11 @@ The app will automatically reload when you make changes to the code.
 
 1. **Enter Principal Amount** - Input the loan amount in rupees (₹)
 2. **Enter Annual Interest Rate** - Input the interest rate as percentage (%)
-3. **Enter Tenure** - Choose either:
+3. **Enter Loan Start Date** - Select the date when your loan begins (defaults to today)
+4. **Enter Tenure** - Choose either:
    - Years (will be converted to months)
    - Months (direct entry)
-4. **Click Calculate** - View instant results
+5. **Click Calculate** - View instant results
 
 ### Understanding Results
 
@@ -67,7 +69,7 @@ The app will automatically reload when you make changes to the code.
 
 The table shows month-by-month breakdown:
 
-- **Month** - Payment month number
+- **Due Date** - Actual payment due date based on loan start date
 - **Opening Balance** - Loan balance at the start of the month
 - **EMI** - Monthly payment amount
 - **Interest** - Interest portion of the EMI (orange)
