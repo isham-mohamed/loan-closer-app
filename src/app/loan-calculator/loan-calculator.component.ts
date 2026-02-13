@@ -1,87 +1,85 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LoanService } from '../services/loan.service';
+import { AmortizationRow, LoanInput } from '../models/loan-data.model';
 
 @Component({
   selector: 'app-loan-calculator',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './loan-calculator.component.html',
   styleUrls: ['./loan-calculator.component.css'],
 })
-export class LoanCalculatorComponent {
+export class LoanCalculatorComponent implements OnInit {
   principal: number | null = null;
   principalDisplay: string = '';
-  annualRate: number | null = null; // percent
+  annualRate: number | null = null;
   tenureYears: number | null = null;
   tenureMonths: number | null = null;
 
   emi = 0;
   totalPayable = 0;
   totalInterest = 0;
-  schedule: Array<{
-    month: number;
-    opening: number;
-    emi: number;
-    interest: number;
-    principal: number;
-    closing: number;
-  }> = [];
+  schedule: AmortizationRow[] = [];
+
+  constructor(private loanService: LoanService) {}
+
+  ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    const data = this.loanService.loadData();
+    if (data) {
+      this.principal = data.principal || null;
+      this.principalDisplay = data.principal ? data.principal.toLocaleString('en-IN') : '';
+      this.annualRate = data.annualRate || null;
+      this.tenureYears = data.tenureYears || null;
+      this.tenureMonths = data.tenureMonths || null;
+
+      // If data was saved with results, restore them
+      if (data.result) {
+        this.emi = data.result.emi;
+        this.totalInterest = data.result.totalInterest;
+        this.totalPayable = data.result.totalPayable;
+        this.schedule = data.result.schedule;
+      }
+    }
+  }
+
+  saveData() {
+    const input: LoanInput = {
+      principal: this.principal,
+      annualRate: this.annualRate,
+      tenureYears: this.tenureYears,
+      tenureMonths: this.tenureMonths,
+    };
+    const data = {
+      ...input,
+      result: {
+        emi: this.emi,
+        totalInterest: this.totalInterest,
+        totalPayable: this.totalPayable,
+        schedule: this.schedule,
+      },
+    };
+    this.loanService.saveData(data);
+  }
 
   calculate() {
-    const P = Number(this.principal) || 0;
-    const annualRate = Number(this.annualRate) || 0;
-    let n = 0;
-    if (this.tenureMonths) n = Number(this.tenureMonths);
-    else if (this.tenureYears) n = Number(this.tenureYears) * 12;
-    else n = 0;
-    const r = annualRate / 100 / 12; // monthly rate
+    const input: LoanInput = {
+      principal: this.principal,
+      annualRate: this.annualRate,
+      tenureYears: this.tenureYears,
+      tenureMonths: this.tenureMonths,
+    };
 
-    if (P <= 0 || n <= 0) {
-      this.resetResults();
-      return;
-    }
-
-    if (r === 0) {
-      this.emi = P / n;
-    } else {
-      const factor = Math.pow(1 + r, n);
-      this.emi = (P * r * factor) / (factor - 1);
-    }
-
-    // round EMI to 2 decimals
-    this.emi = Math.round(this.emi * 100) / 100;
-
-    let balance = P;
-    this.schedule = [];
-    let totalInterest = 0;
-
-    for (let i = 1; i <= n; i++) {
-      const interest = Math.round(balance * r * 100) / 100;
-      // principal component may need to be adjusted on last payment to avoid tiny negative balances
-      let principalComponent = Math.round((this.emi - interest) * 100) / 100;
-      if (i === n) {
-        // final payment: pay off remaining balance (deal with rounding)
-        principalComponent = Math.round(balance * 100) / 100;
-      }
-      let closing = Math.round((balance - principalComponent) * 100) / 100;
-      if (closing < 0) closing = 0;
-
-      this.schedule.push({
-        month: i,
-        opening: Math.round(balance * 100) / 100,
-        emi: this.emi,
-        interest,
-        principal: principalComponent,
-        closing,
-      });
-
-      totalInterest += interest;
-      balance = closing;
-    }
-
-    this.totalInterest = Math.round(totalInterest * 100) / 100;
-    this.totalPayable = Math.round(this.emi * n * 100) / 100;
+    const result = this.loanService.calculateLoan(input);
+    this.emi = result.emi;
+    this.totalInterest = result.totalInterest;
+    this.totalPayable = result.totalPayable;
+    this.schedule = result.schedule;
+    this.saveData();
   }
 
   resetResults() {
@@ -93,17 +91,12 @@ export class LoanCalculatorComponent {
 
   resetAll() {
     this.principal = null;
+    this.principalDisplay = '';
     this.annualRate = null;
     this.tenureYears = null;
     this.tenureMonths = null;
     this.resetResults();
-  }
-
-  formatMoney(v: number) {
-    return Number(v).toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+    this.loanService.clearData();
   }
 
   onPrincipalChange(event: any) {
@@ -118,5 +111,12 @@ export class LoanCalculatorComponent {
         this.principalDisplay = num.toLocaleString('en-IN');
       }
     }
+  }
+
+  formatMoney(v: number) {
+    return Number(v).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 }
