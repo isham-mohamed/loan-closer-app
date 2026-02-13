@@ -1,63 +1,111 @@
-<div class="card">
-  <h2>Loan Calculator</h2>
-
-  <div class="form-row">
-    <label>Loan amount (principal)</label>
-    <input type="number" [(ngModel)]="principal" placeholder="e.g. 500000" />
-  </div>
-
-  <div class="form-row">
-    <label>Annual interest rate (%)</label>
-    <input type="number" [(ngModel)]="annualRate" placeholder="e.g. 7.5" step="0.01" />
-  </div>
-
-  <div class="form-row split">
-    <div>
-      <label>Tenure (years)</label>
-      <input type="number" [(ngModel)]="tenureYears" placeholder="e.g. 10" />
+<div class="container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1>💰 Loan Calculator</h1>
+      <p>Calculate EMI, interest, and view amortization schedule</p>
     </div>
-    <div>
-      <label>Or tenure (months)</label>
-      <input type="number" [(ngModel)]="tenureMonths" placeholder="e.g. 120" />
+  </header>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Left Panel: Form -->
+    <div class="form-panel">
+      <div class="form-section">
+        <h2>Loan Details</h2>
+
+        <div class="form-group">
+          <label>Principal Amount</label>
+          <div class="input-wrapper">
+            <span class="currency">₹</span>
+            <input
+              type="text"
+              [value]="principalDisplay"
+              (input)="onPrincipalChange($event)"
+              placeholder="Enter loan amount"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Annual Interest Rate</label>
+          <div class="input-wrapper">
+            <input type="number" [(ngModel)]="annualRate" placeholder="e.g. 7.5" step="0.01" />
+            <span class="unit">%</span>
+          </div>
+        </div>
+
+        <div class="tenure-group">
+          <div class="form-group">
+            <label>Tenure (Years)</label>
+            <div class="input-wrapper">
+              <input type="number" [(ngModel)]="tenureYears" placeholder="e.g. 10" />
+              <span class="unit">yr</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Or (Months)</label>
+            <div class="input-wrapper">
+              <input type="number" [(ngModel)]="tenureMonths" placeholder="e.g. 120" />
+              <span class="unit">mo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" (click)="calculate()">Calculate</button>
+          <button class="btn btn-secondary" (click)="resetAll()">Reset</button>
+        </div>
+      </div>
+
+      <!-- Results Summary Card -->
+      <div class="results-card" *ngIf="emi > 0">
+        <h3>Summary</h3>
+        <div class="result-item">
+          <span class="label">Monthly EMI</span>
+          <span class="value">₹ {{ formatMoney(emi) }}</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Total Interest</span>
+          <span class="value highlight">₹ {{ formatMoney(totalInterest) }}</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Total Payable</span>
+          <span class="value">₹ {{ formatMoney(totalPayable) }}</span>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="actions">
-    <button (click)="calculate()">Calculate</button>
-    <button (click)="resetAll()" class="secondary">Reset</button>
-  </div>
-
-  <div class="results" *ngIf="emi > 0">
-    <p><strong>Monthly EMI:</strong> {{ formatMoney(emi) }}</p>
-    <p><strong>Total interest:</strong> {{ formatMoney(totalInterest) }}</p>
-    <p><strong>Total payable:</strong> {{ formatMoney(totalPayable) }}</p>
-  </div>
-
-  <div class="schedule" *ngIf="schedule.length">
-    <h3>Amortization Schedule</h3>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>Opening</th>
-            <th>EMI</th>
-            <th>Interest</th>
-            <th>Principal</th>
-            <th>Closing</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of schedule">
-            <td>{{ row.month }}</td>
-            <td>{{ formatMoney(row.opening) }}</td>
-            <td>{{ formatMoney(row.emi) }}</td>
-            <td>{{ formatMoney(row.interest) }}</td>
-            <td>{{ formatMoney(row.principal) }}</td>
-            <td>{{ formatMoney(row.closing) }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Right Panel: Table -->
+    <div class="table-panel" *ngIf="schedule.length">
+      <div class="table-header">
+        <h2>Amortization Schedule</h2>
+        <span class="row-count">{{ schedule.length }} months</span>
+      </div>
+      <div class="table-container">
+        <table class="amortization-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Opening Balance</th>
+              <th>EMI</th>
+              <th>Interest</th>
+              <th>Principal</th>
+              <th>Closing Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of schedule; let i = index" [class.alternate]="i % 2 === 1">
+              <td class="month-col">{{ row.month }}</td>
+              <td class="number">{{ formatMoney(row.opening) }}</td>
+              <td class="number">{{ formatMoney(row.emi) }}</td>
+              <td class="number interest">{{ formatMoney(row.interest) }}</td>
+              <td class="number principal">{{ formatMoney(row.principal) }}</td>
+              <td class="number">{{ formatMoney(row.closing) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

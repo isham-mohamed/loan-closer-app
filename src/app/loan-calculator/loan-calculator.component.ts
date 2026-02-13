@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class LoanCalculatorComponent {
   principal: number | null = null;
+  principalDisplay: string = '';
   annualRate: number | null = null; // percent
   tenureYears: number | null = null;
   tenureMonths: number | null = null;
@@ -103,5 +104,19 @@ export class LoanCalculatorComponent {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+  }
+
+  onPrincipalChange(event: any) {
+    const input = event.target.value.replace(/,/g, '');
+    if (input === '') {
+      this.principal = null;
+      this.principalDisplay = '';
+    } else {
+      const num = parseInt(input, 10);
+      if (!isNaN(num)) {
+        this.principal = num;
+        this.principalDisplay = num.toLocaleString('en-IN');
+      }
+    }
   }
 }
